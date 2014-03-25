@@ -1,0 +1,153 @@
+> source('~/R/main.R', echo=TRUE)
+
+> source('~/R/dbconnect.r', echo=TRUE)
+
+> library (RPostgreSQL)
+
+> #loads the PostgreSQL driver
+  > drv <- dbDriver ("PostgreSQL")
+
+> #Open a connection
+  > con <- dbConnect (drv , dbname = "wildlife" , user = "postgres" , password = "postgres" , host = "localhost")
+
+> #Listing tables
+  > dbListTables(con)
+[1] "parks"    "tourists" "visits"  
+
+> source('~/R/metadata.R', echo=TRUE)
+
+> ###
+  > # R function to discover meta data  
+  > ##
+  > # @param (d) (connection to the database)
+  > # @param (N) (estimated number of total attributes in  .... [TRUNCATED] 
+  
+  > ###
+  > # R function to discover attribute dimensions of a given relation
+  > ##
+  > # @param (r) (relation name)
+  > ##
+  > # @return (count) (number of attr .... [TRUNCATED] 
+  
+  > ###
+  > # R function to discover attribute domain of a given attribute in a given relation 
+  > ##
+  > # @param (r) (relation name)
+  > # @param (a) (attrib .... [TRUNCATED] 
+  
+  > ###
+  > # R function to discover number of tuples in a relation
+  > ##
+  > # @param (r) (relation name)
+  > ##
+  > # @return (count) (tuple count of relation) .... [TRUNCATED] 
+  
+  > source('~/R/unary.keys.R', echo=TRUE)
+
+> ##
+  > # R function to discover keys in a given relation w.r.t an given approximate threshold
+  > ##
+  > # @param (p) (intermediate data profiling result) .... [TRUNCATED] 
+  
+  > source('~/R/compound.keys.R', echo=TRUE)
+
+> ##
+  > # R function to discover compound keys of a given relation w.r.t. a compound key size and a approximation threshold
+  > ##
+  > # @param (p) (interm .... [TRUNCATED] 
+  
+  > ##
+  > # R function to discover distinct values of a set of compound attributes
+  > ##
+  > # @param (r) (name of the relation)
+  > # @param (as) (a set of a .... [TRUNCATED] 
+  
+  > source('~/R/attribute.uind.r', echo=TRUE)
+
+> ##
+  > # R function for discovery of key based UINDs
+  > # 
+  > ##
+  > # @param (p) (intermediate data profiling result)
+  > ##
+  > # @return (intermediate data .... [TRUNCATED] 
+  
+  > ##
+  > # R function for calculating fraction of inclusions between two attributes.
+  > # @assumption (right hand side attribute is a unary key)
+  > ##
+  > # .... [TRUNCATED] 
+  
+  > #profiling.discovery.attributes.uind("tourists","quarter","visits","quarter")
+  > #profiling.discovery.attributes.uind("visits","park","parks","park")
+  
+  > p1 <- profiling.discovery.metadata(con, N=100)
+
+> p1
+identifier relation attribute dataType isNullable tupleCount cardinality isUK conUK isminCKC isUIND UINDof conUIND
+1           1    parks      park     text      FALSE         16          16 <NA>  <NA>     <NA>   <NA>   <NA>    <NA>
+  2           2    parks      type     text      FALSE         16           6 <NA>  <NA>     <NA>   <NA>   <NA>    <NA>
+  3           3 tourists   quarter     text      FALSE        100           4 <NA>  <NA>     <NA>   <NA>   <NA>    <NA>
+  4           4 tourists    region     text      FALSE        100           9 <NA>  <NA>     <NA>   <NA>   <NA>    <NA>
+  5           5 tourists   country     text      FALSE        100          13 <NA>  <NA>     <NA>   <NA>   <NA>    <NA>
+  6           6 tourists  agegroup     text      FALSE        100           6 <NA>  <NA>     <NA>   <NA>   <NA>    <NA>
+  7           7 tourists       sex     text      FALSE        100           2 <NA>  <NA>     <NA>   <NA>   <NA>    <NA>
+  8           8 tourists  arrivals  integer       TRUE        100          92 <NA>  <NA>     <NA>   <NA>   <NA>    <NA>
+  9           9   visits   quarter     text      FALSE          9           4 <NA>  <NA>     <NA>   <NA>   <NA>    <NA>
+  10         10   visits      park     text      FALSE          9           3 <NA>  <NA>     <NA>   <NA>   <NA>    <NA>
+  11         11   visits    visits  integer      FALSE          9           3 <NA>  <NA>     <NA>   <NA>   <NA>    <NA>
+  
+  > p2 <- profiling.discovery.keys.unary(p1, t=0)
+
+> p2
+identifier relation attribute dataType isNullable tupleCount cardinality  isUK conUK isminCKC isUIND UINDof conUIND
+1           1    parks      park     text      FALSE         16          16  TRUE  1.00     <NA>   <NA>   <NA>    <NA>
+  2           2    parks      type     text      FALSE         16           6 FALSE  <NA>     <NA>   <NA>   <NA>    <NA>
+  3           3 tourists   quarter     text      FALSE        100           4 FALSE  <NA>     <NA>   <NA>   <NA>    <NA>
+  4           4 tourists    region     text      FALSE        100           9 FALSE  <NA>     <NA>   <NA>   <NA>    <NA>
+  5           5 tourists   country     text      FALSE        100          13 FALSE  <NA>     <NA>   <NA>   <NA>    <NA>
+  6           6 tourists  agegroup     text      FALSE        100           6 FALSE  <NA>     <NA>   <NA>   <NA>    <NA>
+  7           7 tourists       sex     text      FALSE        100           2 FALSE  <NA>     <NA>   <NA>   <NA>    <NA>
+  8           8 tourists  arrivals  integer       TRUE        100          92 FALSE  1.00     <NA>   <NA>   <NA>    <NA>
+  9           9   visits   quarter     text      FALSE          9           4 FALSE  <NA>     <NA>   <NA>   <NA>    <NA>
+  10         10   visits      park     text      FALSE          9           3 FALSE  <NA>     <NA>   <NA>   <NA>    <NA>
+  11         11   visits    visits  integer      FALSE          9           3 FALSE  <NA>     <NA>   <NA>   <NA>    <NA>
+  
+  > p3 <- profiling.discovery.keys.compound(p2,"visits")
+[1] 1
+
+> p3 <- profiling.discovery.keys.compound(p3,"toursits", n=5)
+
+> p3 <- profiling.discovery.keys.compound(p3,"parks")
+
+> p3
+identifier relation attribute dataType isNullable tupleCount cardinality  isUK conUK isminCKC isUIND UINDof conUIND
+1           1    parks      park     text      FALSE         16          16  TRUE  1.00     TRUE   <NA>   <NA>    <NA>
+  2           2    parks      type     text      FALSE         16           6 FALSE  <NA>     <NA>   <NA>   <NA>    <NA>
+  3           3 tourists   quarter     text      FALSE        100           4 FALSE  <NA>     <NA>   <NA>   <NA>    <NA>
+  4           4 tourists    region     text      FALSE        100           9 FALSE  <NA>     <NA>   <NA>   <NA>    <NA>
+  5           5 tourists   country     text      FALSE        100          13 FALSE  <NA>     <NA>   <NA>   <NA>    <NA>
+  6           6 tourists  agegroup     text      FALSE        100           6 FALSE  <NA>     <NA>   <NA>   <NA>    <NA>
+  7           7 tourists       sex     text      FALSE        100           2 FALSE  <NA>     <NA>   <NA>   <NA>    <NA>
+  8           8 tourists  arrivals  integer       TRUE        100          92 FALSE  1.00     <NA>   <NA>   <NA>    <NA>
+  9           9   visits   quarter     text      FALSE          9           4 FALSE  <NA>     TRUE   <NA>   <NA>    <NA>
+  10         10   visits      park     text      FALSE          9           3 FALSE  <NA>     TRUE   <NA>   <NA>    <NA>
+  11         11   visits    visits  integer      FALSE          9           3 FALSE  <NA>     <NA>   <NA>   <NA>    <NA>
+  
+  > p4 <- profiling.discovery.uinds(p3)
+[1] "FALSE"
+[1] "FALSE"
+
+> p4
+identifier relation attribute dataType isNullable tupleCount cardinality  isUK conUK isminCKC isUIND     UINDof conUIND
+1           1    parks      park     text      FALSE         16          16  TRUE  1.00     TRUE  FALSE       <NA>    <NA>
+  2           2    parks      type     text      FALSE         16           6 FALSE  <NA>     <NA>  FALSE       <NA>    <NA>
+  3           3 tourists   quarter     text      FALSE        100           4 FALSE  <NA>     <NA>  FALSE       <NA>    <NA>
+  4           4 tourists    region     text      FALSE        100           9 FALSE  <NA>     <NA>  FALSE       <NA>    <NA>
+  5           5 tourists   country     text      FALSE        100          13 FALSE  <NA>     <NA>  FALSE       <NA>    <NA>
+  6           6 tourists  agegroup     text      FALSE        100           6 FALSE  <NA>     <NA>  FALSE       <NA>    <NA>
+  7           7 tourists       sex     text      FALSE        100           2 FALSE  <NA>     <NA>  FALSE       <NA>    <NA>
+  8           8 tourists  arrivals  integer       TRUE        100          92 FALSE  1.00     <NA>  FALSE       <NA>    <NA>
+  9           9   visits   quarter     text      FALSE          9           4 FALSE  <NA>     TRUE  FALSE       <NA>    <NA>
+  10         10   visits      park     text      FALSE          9           3 FALSE  <NA>     TRUE   TRUE parks.park    0.19
+11         11   visits    visits  integer      FALSE          9           3 FALSE  <NA>     <NA>  FALSE       <NA>    <NA>
